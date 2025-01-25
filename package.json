@@ -9,6 +9,12 @@
   "dependencies": {
     "front-matter": "^4.0.2",
     "fs-extra": "^10.1.0",
+    "gray-matter": "^4.0.3",
     "marked": "^4.3.0"
-  }
+  },
+  "main": "index.js",
+  "devDependencies": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
