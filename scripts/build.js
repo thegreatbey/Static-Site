@@ -1,6 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 const marked = require('marked');
+const matter = require('gray-matter');
 
 async function build() {
     try {
@@ -35,8 +36,14 @@ async function build() {
 
                 const content = await fs.readFile(filePath, 'utf-8');
                 
-                // Convert markdown to HTML
-                const htmlContent = marked.parse(content);
+                // Parse frontmatter
+                const frontMatter = matter(content);
+                
+                // Convert markdown to HTML (use parsed content)
+                const htmlContent = marked.parse(frontMatter.content);
+
+                // You can now use frontMatter.data to access the metadata
+                // For example: frontMatter.data.title, frontMatter.data.date, etc.
 
                 // Insert the HTML content into the base template
                 const finalHtml = baseTemplate.replace('{{content}}', htmlContent);
