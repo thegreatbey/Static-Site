@@ -36,8 +36,8 @@ async function processMarkdown(content) {
 
 async function build() {
     try {
-        // Add debug logging
-        const templatePath = path.join(__dirname, '../templates/base.html');
+        // Fix template path to include 'src'
+        const templatePath = path.join(__dirname, '../src/templates/base.html');
         console.log('Looking for template at:', templatePath);
 
         // Create dist directory if it doesn't exist
