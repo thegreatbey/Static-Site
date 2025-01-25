@@ -3,6 +3,37 @@ const path = require('path');
 const marked = require('marked');
 const matter = require('gray-matter');
 
+// Helper function to process template variables
+async function processTemplate(template, variables) {
+    let processedTemplate = template;
+    for (const [key, value] of Object.entries(variables)) {
+        const regex = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
+        processedTemplate = processedTemplate.replace(regex, value);
+    }
+    return processedTemplate;
+}
+
+// Helper function to process markdown content
+async function processMarkdown(content) {
+    // Parse frontmatter
+    const { data: frontMatter, content: markdownContent } = matter(content);
+    
+    // Configure marked options if needed
+    marked.setOptions({
+        gfm: true,
+        breaks: true,
+        smartLists: true
+    });
+
+    // Convert markdown to HTML
+    const htmlContent = marked.parse(markdownContent);
+
+    return {
+        frontMatter,
+        htmlContent
+    };
+}
+
 async function build() {
     try {
         // Add debug logging
@@ -36,17 +67,18 @@ async function build() {
 
                 const content = await fs.readFile(filePath, 'utf-8');
                 
-                // Parse frontmatter
-                const frontMatter = matter(content);
-                
-                // Convert markdown to HTML (use parsed content)
-                const htmlContent = marked.parse(frontMatter.content);
+                // Process markdown and get frontmatter and HTML content
+                const { frontMatter, htmlContent } = await processMarkdown(content);
 
-                // You can now use frontMatter.data to access the metadata
-                // For example: frontMatter.data.title, frontMatter.data.date, etc.
+                // Create template variables object
+                const templateVars = {
+                    content: htmlContent,
+                    title: frontMatter.title || 'Untitled',
+                    ...frontMatter // Spread other frontmatter variables
+                };
 
-                // Insert the HTML content into the base template
-                const finalHtml = baseTemplate.replace('{{content}}', htmlContent);
+                // Process the template with variables
+                const finalHtml = await processTemplate(baseTemplate, templateVars);
 
                 // Write to dist directory
                 const outputPath = path.join(__dirname, '../dist', file.replace('.md', '.html'));
